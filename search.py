@@ -16,7 +16,63 @@ def word_tokenizer(text):
     return tokens
 
 def build_index():
-    pass
+    politeness_window = 6
+    site_links = []
+    visited_links = []
+    inverted_index = {}
+    # get response from home page of website
+    prefix = "https://quotes.toscrape.com"
+    webpage_response = requests.get("https://quotes.toscrape.com/")
+
+    webpage = webpage_response.content
+    # parse the webpage for all links
+    soup = BeautifulSoup(webpage, "html.parser")
+    webpage_links = soup.find_all("a")
+    for link in webpage_links:
+        if link.get("href").startswith("/"):
+            site_links.append(prefix + link["href"])
+
+    while site_links:
+        site_link = site_links.pop(0)
+        if site_link not in visited_links:  # Only visit if not already visited
+            print(f"Crawling: {site_link}")
+            try:
+                webpage_response = requests.get(site_link)
+                webpage = webpage_response.content
+                soup = BeautifulSoup(webpage, "html.parser")
+                
+                containers = soup.find_all(class_="container")
+                all_text = containers[0].get_text(separator=' ', strip=True)
+                tokens = word_tokenizer(all_text)
+                # add words to inverted index
+                for index, token in enumerate(tokens):
+                    if token not in inverted_index:
+                        inverted_index[token] = {}
+                        inverted_index[token][site_link] = []
+                        inverted_index[token][site_link].append(index)
+                    else:
+                        if site_link not in inverted_index[token]:
+                            inverted_index[token][site_link] = []
+                            inverted_index[token][site_link].append(index)
+                        else:
+                            inverted_index[token][site_link].append(index)
+                # parse all links which have not been visited
+                webpage_links = soup.find_all("a")
+                for link in webpage_links:
+                    if link.get("href").startswith("/"):
+                        page_link = prefix + link["href"]
+                        if (page_link not in visited_links) and (page_link not in site_links):
+                            site_links.append(page_link)
+                visited_links.append(site_link)
+            except Exception as e:
+                print(e)
+            # politeness window before sending next request
+            time.sleep(politeness_window)
+    # save inverted index to json file
+    filename = 'inverted_index.json'
+    with open(filename, 'w', encoding='utf-8') as file:
+        json.dump(inverted_index, file, ensure_ascii=False, indent=4)
+        print("Inverted index built and saved successfully!")
     
 
 def load_index():
