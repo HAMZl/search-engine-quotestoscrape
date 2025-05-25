@@ -76,7 +76,12 @@ def build_index():
     
 
 def load_index():
-    pass
+    filename = 'inverted_index.json'
+    # load json file
+    with open(filename, 'r', encoding='utf-8') as file:
+        inverted_index = json.load(file)
+    print("Inverted index loaded successfully!")
+    return inverted_index
 
 def print_index(inverted_index, word):
     pass
