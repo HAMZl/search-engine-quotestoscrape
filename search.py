@@ -94,11 +94,25 @@ def print_index(inverted_index, word):
 def power_set(lst):
     # Start with just the empty set
     result = [[]]
+    # For each element in the original list
+    for element in lst:
+        # For each subset already in the result
+        new_subsets = []
+        for subset in result:
+            # Create a new subset by adding the current element to it
+            new_subset = subset + [element]
+            new_subsets.append(new_subset)
+
+        # Add the new subsets to the result
+        result.extend(new_subsets)
+    result = result[::-1]
+    return result[:-1]
 
 def find_query(inverted_index, words):
     words = " ".join(words)
     tokens = word_tokenizer(words)
     tokens_list = power_set(tokens)
+    
         
 
 if __name__ == "__main__":
