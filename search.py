@@ -90,7 +90,6 @@ def print_index(inverted_index, word):
     else:
         print(f"{word} is not in inverted index!")
 
-
 def power_set(lst):
     # Start with just the empty set
     result = [[]]
