@@ -84,14 +84,21 @@ def load_index():
     return inverted_index
 
 def print_index(inverted_index, word):
-    pass
+    word = word.lower()
+    if word in inverted_index:
+        print(inverted_index[word])
+    else:
+        print(f"{word} is not in inverted index!")
 
 
 def power_set(lst):
-    pass
+    # Start with just the empty set
+    result = [[]]
 
 def find_query(inverted_index, words):
-    pass
+    words = " ".join(words)
+    tokens = word_tokenizer(words)
+    tokens_list = power_set(tokens)
         
 
 if __name__ == "__main__":
