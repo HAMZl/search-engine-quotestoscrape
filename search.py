@@ -127,6 +127,29 @@ def find_query(inverted_index, words):
             word_wbpgs = set(inverted_index[word].keys())
             webpages = webpages & word_wbpgs
         
+        page_rank = []
+        # compute frequency and positions for each word in webpage
+        for webpage in webpages:
+            frequency = 0
+            positions = []
+            for word in tokens:
+                frequency += len(inverted_index[word][webpage])
+                positions += inverted_index[word][webpage]
+            positions.sort(reverse=True)
+            
+            # compute average distance between words for each webpage
+            average_distance = 0
+            
+            for i in range(len(positions) - 1):
+                average_distance *= i
+                average_distance += (positions[i] - positions[i+1])
+                average_distance /= (i+1)
+            page_rank.append((webpage, frequency, average_distance))
+        # sort webpages based on frequency and average distance
+        page_rank.sort(key=lambda x: (-x[1], x[2]))
+        for i, page in enumerate(page_rank[:5]):
+            print(f"\t{i+1} {page[0]}: {page[1]} {page[2]}")
+        
 
 if __name__ == "__main__":
     while True:
