@@ -111,7 +111,21 @@ def find_query(inverted_index, words):
     words = " ".join(words)
     tokens = word_tokenizer(words)
     tokens_list = power_set(tokens)
-    
+    for tokens in tokens_list:
+        print(f"Results for Word(s): {', '.join(tokens)}")
+        for token in tokens:
+            if token not in inverted_index:
+                print("No Webpages found!")
+                return
+        webpages = inverted_index[tokens[0]].keys()
+        webpages = set(webpages)
+        
+        for word in tokens[1:]:
+            if word not in inverted_index:
+                print("No Webpages found!")
+                return
+            word_wbpgs = set(inverted_index[word].keys())
+            webpages = webpages & word_wbpgs
         
 
 if __name__ == "__main__":
