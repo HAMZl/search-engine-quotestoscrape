@@ -74,11 +74,11 @@ To run this project, you need the following:
 Install the required packages using pip:
 
 ```bash
-pip install requests beautifulsoup4
+pip install -r requirements.txt
 ```
 
 To run the program:
 
 ```bash
-python main.py
+python search.py
 ```
