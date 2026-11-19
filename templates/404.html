@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% from "_macros.html" import wordmark, search_form %}
+{% block title %}Page not found · Quotes Search{% endblock %}
+{% block body %}
+<main class="home">
+  {{ wordmark() }}
+  <div class="empty">
+    <h1>Page not found</h1>
+    <p>That page doesn’t exist, but you can search for something else.</p>
+  </div>
+  {{ search_form(large=True) }}
+</main>
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% from "_macros.html" import wordmark, search_form, query_chip %}
+{% block title %}{{ query }} · Quotes Search{% endblock %}
+{% block body_class %}page-results{% endblock %}
+{% block body %}
+<header class="topbar">
+  {{ wordmark(small=True) }}
+  {{ search_form(query) }}
+</header>
+
+<main class="results">
+  {% set r = response %}
+  {% set known = r.terms | reject("in", r.unknown_terms) | list %}
+
+  {% if r.total %}
+    <p class="results__summary">
+      {{ "{:,}".format(r.total) }} page{{ "s" if r.total != 1 }}
+      <span aria-hidden="true">·</span> {{ "%.1f" | format(elapsed * 1000) }} ms
+      {% if r.phrases %}<span aria-hidden="true">·</span> exact phrase{{ "s" if r.phrases|length > 1 }}:
+        {% for p in r.phrases %}<q>{{ p | join(" ") }}</q>{{ ", " if not loop.last }}{% endfor %}{% endif %}
+    </p>
+  {% endif %}
+
+  {% if r.suggested_query %}
+    <p class="notice">Did you mean <a href="{{ url_for('home', q=r.suggested_query) }}"><strong>{{ r.suggested_query }}</strong></a>?</p>
+  {% endif %}
+  {% if r.unknown_terms %}
+    <p class="notice notice--muted">Not found anywhere: {% for t in r.unknown_terms %}<s>{{ t }}</s>{{ ", " if not loop.last }}{% endfor %}</p>
+  {% endif %}
+
+  {% if not r.terms %}
+    <div class="empty">
+      <h1>Nothing to search for</h1>
+      <p>“{{ query }}” only contains common words (like “the” or “is”) that aren’t indexed. Try something more specific.</p>
+      <div class="chips">{% for q in examples %}{{ query_chip(q) }}{% endfor %}</div>
+    </div>
+  {% elif not r.total %}
+    <div class="empty">
+      <h1>No pages found</h1>
+      <p>{% if r.phrases %}No page contains that exact phrase. Try removing the quotes.{% else %}No page contains any of those words.{% endif %}</p>
+      <div class="chips">{% for q in examples %}{{ query_chip(q) }}{% endfor %}</div>
+    </div>
+  {% elif not r.results %}
+    <div class="empty">
+      <h1>No more results</h1>
+      <p><a href="{{ url_for('home', q=query) }}">Back to the first page</a></p>
+    </div>
+  {% else %}
+    <ol class="result-list" start="{{ r.offset + 1 }}">
+      {% set ns = namespace(partial_shown=false) %}
+      {% for res in r.results %}
+        {% if not res.complete and not ns.partial_shown and known|length > 1 %}
+          {% set ns.partial_shown = true %}
+          <li class="divider" aria-hidden="true"><span>Pages matching only some of your words</span></li>
+        {% endif %}
+        <li class="result">
+          <a class="result__title" href="{{ res.url }}" rel="noopener" target="_blank">{{ res.title }}</a>
+          <div class="result__url">{{ res.url.split("://", 1)[-1] }}</div>
+          <p class="result__snippet">
+            {%- for s in res.snippet -%}
+              {%- if s.hit %}<mark>{{ s.text }}</mark>{% else %}{{ s.text }}{% endif -%}
+            {%- endfor -%}
+          </p>
+          <div class="result__meta">
+            {% for t in known %}
+              {% if t in res.matched_terms %}<span class="chip chip--hit">{{ t }}</span>
+              {% else %}<span class="chip chip--missing" title="Not on this page">{{ t }}</span>{% endif %}
+            {% endfor %}
+            <span class="result__stats">
+              {{ res.frequency }} match{{ "es" if res.frequency != 1 }}
+              {% if res.window %}· within {{ res.window }} words{% endif %}
+              · score {{ "%.2f" | format(res.score) }}
+            </span>
+          </div>
+        </li>
+      {% endfor %}
+    </ol>
+
+    {% if pages > 1 %}
+      <nav class="pager" aria-label="Result pages">
+        {% if page > 1 %}<a class="pager__step" href="{{ url_for('home', q=query, page=page - 1) }}" rel="prev">← Previous</a>{% endif %}
+        {% for n in range([1, page - 2]|max, [pages, page + 2]|min + 1) %}
+          {% if n == page %}<span class="pager__num" aria-current="page">{{ n }}</span>
+          {% else %}<a class="pager__num" href="{{ url_for('home', q=query, page=n) }}">{{ n }}</a>{% endif %}
+        {% endfor %}
+        {% if page < pages %}<a class="pager__step" href="{{ url_for('home', q=query, page=page + 1) }}" rel="next">Next →</a>{% endif %}
+      </nav>
+    {% endif %}
+  {% endif %}
+</main>
+{% endblock %}

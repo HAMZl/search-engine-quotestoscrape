@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% from "_macros.html" import wordmark, search_form, query_chip %}
+{% block body_class %}page-home{% endblock %}
+{% block body %}
+<main class="home">
+  {{ wordmark() }}
+  <p class="home__tagline">A from-scratch search engine over every quote, author and tag on quotes.toscrape.com.</p>
+
+  {% if error %}
+    <div class="notice notice--error" role="alert">
+      <strong>The search index isn’t available.</strong>
+      <p>{{ error }}</p>
+    </div>
+  {% else %}
+    {{ search_form(query, large=True, autofocus=True) }}
+
+    <section class="home__section" aria-labelledby="try-heading">
+      <h2 id="try-heading">Try</h2>
+      <div class="chips">{% for q in examples %}{{ query_chip(q) }}{% endfor %}</div>
+    </section>
+
+    {% if popular %}
+    <section class="home__section" aria-labelledby="popular-heading">
+      <h2 id="popular-heading">Most widespread words</h2>
+      <div class="chips">{% for q in popular %}{{ query_chip(q) }}{% endfor %}</div>
+    </section>
+    {% endif %}
+
+    <section class="how" aria-labelledby="how-heading">
+      <h2 id="how-heading">How results are ranked</h2>
+      <ol>
+        <li><strong>Coverage.</strong> Pages containing all of your words come first, then pages with fewer of them.</li>
+        <li><strong>Relevance.</strong> BM25 scoring rewards rare words and doesn’t let long pages win just by being long.</li>
+        <li><strong>Proximity.</strong> Pages where your words appear close together get a boost.</li>
+      </ol>
+      <p>Wrap words in <code>"quotes"</code> to require an exact phrase. Common words like “the” and “is” are ignored.</p>
+    </section>
+  {% endif %}
+</main>
+{% endblock %}
