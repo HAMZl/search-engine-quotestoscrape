@@ -1,0 +1,22 @@
+{% macro wordmark(small=False) -%}
+<a class="wordmark{{ ' wordmark--small' if small }}" href="{{ url_for('home') }}" aria-label="Quotes Search home">
+  <span class="wordmark__mark" aria-hidden="true">“</span><span>Quotes<em>Search</em></span>
+</a>
+{%- endmacro %}
+
+{% macro search_form(query='', large=False, autofocus=False) -%}
+<form class="search{{ ' search--large' if large }}" action="{{ url_for('home') }}" method="get" role="search">
+  <label class="visually-hidden" for="q">Search quotes, authors and tags</label>
+  <svg class="search__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+  <input id="q" name="q" type="search" value="{{ query }}" maxlength="200"
+         placeholder="Search quotes, authors, tags…" autocomplete="off" spellcheck="false"
+         list="completions"{{ ' autofocus' if autofocus }}>
+  <datalist id="completions"></datalist>
+  <kbd class="search__hint" aria-hidden="true">/</kbd>
+  <button type="submit">Search</button>
+</form>
+{%- endmacro %}
+
+{% macro query_chip(text) -%}
+<a class="chip chip--link" href="{{ url_for('home', q=text) }}">{{ text }}</a>
+{%- endmacro %}
